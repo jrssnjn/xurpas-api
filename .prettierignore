@@ -1,0 +1,6 @@
+*.yml
+firebase-service-account-key.json
+package-lock.json
+package.json
+README.md
+.prettierrc.js
