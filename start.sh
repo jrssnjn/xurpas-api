@@ -11,4 +11,4 @@ b) build_name=${OPTARG};;
 esac
 done
 
-docker run -p 3000:3000 --name $build_name $build_name
+docker start $build_name
