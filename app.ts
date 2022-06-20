@@ -3,6 +3,7 @@ import {
    getConfiguration,
    getParkingSpots,
    parkVehicle,
+   unparkVehicle
 } from './parking/controller'
 
 let app: Application | undefined = undefined
@@ -17,5 +18,7 @@ app.use(Express.urlencoded({ extended: true }))
 app.get('/config', getConfiguration)
 app.get('/parking-spots', getParkingSpots)
 app.post('/park-vehicle', parkVehicle)
+app.post('/unpark-vehicle', unparkVehicle)
+
 
 app.listen(PORT, () => console.log(`Server started on PORT ${PORT}`))

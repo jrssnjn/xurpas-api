@@ -118,7 +118,7 @@ export const getParkingSize = function (
 ): Promise<RowDataPacket> {
    return new Promise((resolve, reject) => {
       pool.query(
-         `SELECT pv.parking_spot_id as ps_id, pv.created_at as parked_at, ps.parking_size FROM parking_spots ps INNER JOIN parked_vehicles pv ON ps.id = pv.parking_spot_id WHERE pv.id = ?`,
+         `SELECT pv.parking_spot_id as ps_id, pv.created_at as parked_at, ps.parking_size, pz.description FROM parking_spots ps INNER JOIN parking_size pz ON ps.parking_size = pz.id INNER JOIN parked_vehicles pv ON ps.id = pv.parking_spot_id WHERE pv.id = ?`,
          [receiptNumber],
          (error, rows: RowDataPacket[]) => {
             if (error) reject(error)
