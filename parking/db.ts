@@ -30,6 +30,40 @@ export const getEntryPointdetails = function (
    })
 }
 
+export const parkingSpots = function (
+   entryPoint: number,
+   sizes: number[]
+): Promise<RowDataPacket[]> {
+   return new Promise((resolve, reject) => {
+      pool.query(
+         `SELECT p.id as parkingSpotNumber, distance FROM parking_spot_distances psd INNER JOIN parking_spots p ON psd.parking_spot_id = p.id AND p.is_available = 1 WHERE psd.entry_point_id = ? AND p.parking_size IN (?) ORDER BY distance ASC`,
+         [entryPoint, sizes],
+         (error, rows: RowDataPacket[]) => {
+            if (error) reject(error)
+
+            resolve(rows)
+         }
+      )
+   })
+}
+
+export const closestAvailableParkingSpot = function (
+   entryPoint: number,
+   sizes: number[]
+): Promise<RowDataPacket> {
+   return new Promise((resolve, reject) => {
+      pool.query(
+         `SELECT psd.entry_point_id as entryPoint, p.id as parkingSpotNumber, distance FROM parking_spot_distances psd INNER JOIN parking_spots p ON psd.parking_spot_id = p.id AND p.is_available = 1 WHERE psd.entry_point_id = ? AND p.parking_size IN (?) ORDER BY distance ASC`,
+         [entryPoint, sizes],
+         (error, rows: RowDataPacket[]) => {
+            if (error) reject(error)
+
+            resolve(rows[0])
+         }
+      )
+   })
+}
+
 export const addToParkedVehicles = function (
    parkingSpotNumber: number,
    vehiclePlateNumber: number
