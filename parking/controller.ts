@@ -174,7 +174,7 @@ export const unparkVehicle = async function (req: Request, res: Response) {
       if (hours > 0) {
          switch (parking_size) {
             case 1:
-               rate = config_details.mp_rate
+               rate = config_details.sp_rate
                break
             case 2:
                rate = config_details.mp_rate
