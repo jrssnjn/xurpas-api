@@ -28,8 +28,7 @@ export const getParkingSpots = async function (req: Request, res: Response) {
 
       const cursor = await parkingSpots(+entryPoint, sizes)
 
-      if (cursor.length === 0)
-         return res.status(500).json({ message: 'no available parking spots' })
+      if (cursor.length === 0) return res.status(200).json([])
 
       res.status(200).json(cursor)
    } catch (error) {
@@ -50,8 +49,7 @@ export const parkVehicle = async function (req: Request, res: Response) {
       // fetch all available parking spots that conforms with vehicle size
       const closest = await closestAvailableParkingSpot(entry_point, sizes)
 
-      if (!closest)
-         return res.status(500).json({ message: 'no available parking spot' })
+      if (!closest) return res.status(200).json([])
 
       const { parkingSpotNumber } = closest
 

@@ -1,9 +1,10 @@
 import Express, { Application } from 'express'
+import cors from 'cors'
 import {
    getConfiguration,
    getParkingSpots,
    parkVehicle,
-   unparkVehicle
+   unparkVehicle,
 } from './parking/controller'
 
 let app: Application | undefined = undefined
@@ -15,10 +16,11 @@ app = Express()
 app.use(Express.json())
 app.use(Express.urlencoded({ extended: true }))
 
+app.use(cors())
+
 app.get('/config', getConfiguration)
 app.get('/parking-spots', getParkingSpots)
 app.post('/park-vehicle', parkVehicle)
 app.post('/unpark-vehicle', unparkVehicle)
-
 
 app.listen(PORT, () => console.log(`Server started on PORT ${PORT}`))
