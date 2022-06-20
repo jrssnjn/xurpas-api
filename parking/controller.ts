@@ -168,35 +168,28 @@ export const unparkVehicle = async function (req: Request, res: Response) {
          if (hours > 0) response.exceedingHours = hours
       }
 
-      // check if there are exceeding hours, if yes, proceed with computation.
+      let rate: '0.00' | '40.00' | '20.00' | '60.00' = '0.00'
+
+      // check parking-spot-size and assign respective rate
       if (hours > 0) {
          switch (parking_size) {
             case 1:
-               response.exceedingHourlyRate = Number(config_details.sp_rate)
-               response.exceedingHourlyTotal =
-                  Number(config_details.sp_rate) * hours
-
-               response.total_fees =
-                  response.total_fees + response.exceedingHourlyTotal
+               rate = config_details.sp_rate
                break
             case 2:
-               response.exceedingHourlyRate = Number(config_details.mp_rate)
-               response.exceedingHourlyTotal =
-                  Number(config_details.mp_rate) * hours
-
-               response.total_fees =
-                  response.total_fees + response.exceedingHourlyTotal
+               rate = config_details.mp_rate
                break
             case 3:
-               response.exceedingHourlyRate = Number(config_details.lp_rate)
-               response.exceedingHourlyTotal =
-                  Number(config_details.lp_rate) * hours
-
-               response.total_fees =
-                  response.total_fees + response.exceedingHourlyTotal
+               rate = config_details.lp_rate
                break
          }
       }
+
+      // perform computations using rate.
+      response.exceedingHourlyRate = Number(rate)
+      response.exceedingHourlyTotal = Number(rate) * hours
+
+      response.total_fees = response.total_fees + response.exceedingHourlyTotal
 
       // update availability so it can be included in list of available parking spots
       await updateParkingSpotToAvailable(ps_id)
