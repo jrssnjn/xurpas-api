@@ -36,7 +36,7 @@ export const parkingSpots = function (
 ): Promise<RowDataPacket[]> {
    return new Promise((resolve, reject) => {
       pool.query(
-         `SELECT p.id as parkingSpotNumber, distance FROM parking_spot_distances psd INNER JOIN parking_spots p ON psd.parking_spot_id = p.id AND p.is_available = 1 WHERE psd.entry_point_id = ? AND p.parking_size IN (?) ORDER BY distance ASC`,
+         `SELECT p.id as parkingSpotNumber, psd.distance, ps.description FROM parking_spot_distances psd INNER JOIN parking_spots p ON psd.parking_spot_id = p.id AND p.is_available = 1 INNER JOIN parking_size ps ON p.parking_size = ps.id WHERE psd.entry_point_id = ? AND p.parking_size IN (?) ORDER BY distance ASC`,
          [entryPoint, sizes],
          (error, rows: RowDataPacket[]) => {
             if (error) reject(error)
