@@ -103,9 +103,14 @@ export const unparkVehicle = async function (req: Request, res: Response) {
       // const { parked_at, parking_size } = await getParkingSize(receiptNumber)
 
       // fetch parking-spot-size for computation purposes
-      const { parking_size, ps_id, description } = await getParkingSize(
-         receiptNumber
-      )
+      const parkingSizeDetails = await getParkingSize(receiptNumber)
+
+      if (!parkingSizeDetails)
+         return res
+            .status(404)
+            .json({ message: 'receipt number does not exists.' })
+
+      const { parking_size, ps_id, description } = parkingSizeDetails
 
       // get current time (will represent time the car attempted to leave parking)
       const leaved_parking_at = new Date()
@@ -126,42 +131,61 @@ export const unparkVehicle = async function (req: Request, res: Response) {
          exceedingHourlyTotal?: number
          NumOfDaysTotalFees?: number
          NumOfDaysParked?: number
-         total_fees: number
+         totalFees: number
          carSize?: string
+         totalHoursParked?: number
       } = {
-         total_fees: 0,
+         totalFees: 0,
       }
 
       // if hours parked is less than a day (24h), compute just using exceeding hourly rate.
       if (hours < 24) {
          // if hours parked is more than three hours (3h), compute first three hours by flat rate.
          if (hours > 3) {
+            // attach size of car metadata
+            response.carSize = description
+
+            // attach total num of hours parked.
+            response.totalHoursParked = hours
+
+            // deduct three hours that would be used for computing flat rate total.
             hours = hours - 3
             response.flatRate = config_details.flat_rate
             response.flatRateTotal = Number(config_details.flat_rate) * 3
-            response.total_fees = Number(config_details.flat_rate) * 3
+            response.totalFees = Number(config_details.flat_rate) * 3
 
-            // attach size of car metadata
-            response.carSize = description
             response.exceedingHours = hours
          }
          // if hours parked is less than three hours (3h), compute just using flat rate.
          else {
+            if (hours < 1) hours = 1
+
+            // attach size of car metadata
+            response.carSize = description
+
+            // attach total num of hours parked.
+            response.totalHoursParked = hours
+
+            // compute num of hours for flat rate total
             response.flatRate = config_details.flat_rate
             response.flatRateTotal = Number(config_details.flat_rate) * hours
-            response.total_fees = Number(config_details.flat_rate) * hours
+            response.totalFees = Number(config_details.flat_rate) * hours
             return res.status(200).json(response)
          }
       }
 
       // if hours parked is more than a day (24h), compute using 24 hour chunk rate.
       if (hours >= 24) {
+         // get number of days by dividing by 24
          const num_divided_by = Number((hours / 24).toFixed(0))
+
+         // get remainder a.k.a excess time by applying modulus
          const remaining = hours % 24
 
+         response.totalHoursParked = hours
          response.NumOfDaysParked = num_divided_by
          response.NumOfDaysTotalFees = 5000 * num_divided_by
-         response.total_fees = response.total_fees + response.NumOfDaysTotalFees
+         response.totalFees = response.totalFees + response.NumOfDaysTotalFees
 
          hours = remaining
 
@@ -189,7 +213,7 @@ export const unparkVehicle = async function (req: Request, res: Response) {
       response.exceedingHourlyRate = Number(rate)
       response.exceedingHourlyTotal = Number(rate) * hours
 
-      response.total_fees = response.total_fees + response.exceedingHourlyTotal
+      response.totalFees = response.totalFees + response.exceedingHourlyTotal
 
       // update availability so it can be included in list of available parking spots
       await updateParkingSpotToAvailable(ps_id)
