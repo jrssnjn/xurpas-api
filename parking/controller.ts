@@ -170,6 +170,9 @@ export const unparkVehicle = async function (req: Request, res: Response) {
             response.flatRate = config_details.flat_rate
             response.flatRateTotal = Number(config_details.flat_rate) * hours
             response.totalFees = Number(config_details.flat_rate) * hours
+
+            await updateParkingSpotToAvailable(ps_id)
+
             return res.status(200).json(response)
          }
       }
@@ -216,6 +219,7 @@ export const unparkVehicle = async function (req: Request, res: Response) {
       response.totalFees = response.totalFees + response.exceedingHourlyTotal
 
       // update availability so it can be included in list of available parking spots
+
       await updateParkingSpotToAvailable(ps_id)
 
       res.status(200).json(response)
